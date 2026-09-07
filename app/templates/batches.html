@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% set show_nav = true %}
+{% set active = 'batches' %}
+{% block title %}Lịch sử · Amazon Repurposer{% endblock %}
+
+{% block body %}
+<main>
+<div class="wrap stack" style="gap:18px">
+  <div>
+    <h1>Lịch sử</h1>
+    <p class="muted" style="margin-top:5px">Xoá batch sẽ xoá luôn ảnh trên R2 — không hoàn tác được.</p>
+  </div>
+
+  {% if batches %}
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="btrow bhead">
+      <div>Thời gian</div><div>Trạng thái</div><div class="num">SP</div>
+      <div class="num">Ảnh</div><div></div>
+    </div>
+    {% for b in batches %}
+    <div class="btrow">
+      <div class="mono tiny">{{ b.created_at }}</div>
+      <div>
+        <span class="badge {{ 'ok' if b.status=='done' else ('err' if b.status=='failed' else '') }}">{{ b.status }}</span>
+        {% if b.failed %}<span class="badge err tiny">{{ b.failed }} lỗi</span>{% endif %}
+      </div>
+      <div class="num">{{ b.done }}/{{ b.total }}</div>
+      <div class="num">{{ b.n_images }}</div>
+      <div class="row" style="gap:6px;justify-content:flex-end">
+        <a class="btn btn-sm" href="/?batch={{ b.id }}">Xem</a>
+        <a class="btn btn-sm btn-ghost" href="/batches/{{ b.id }}/export?fmt=json">JSON</a>
+        <a class="btn btn-sm btn-ghost" href="/batches/{{ b.id }}/export?fmt=csv">CSV</a>
+        <a class="btn btn-sm btn-ghost" href="/batches/{{ b.id }}/zip">ZIP</a>
+        <form method="post" action="/batches/{{ b.id }}/delete" style="margin:0"
+              onsubmit="return confirm('Xoá batch này và toàn bộ ảnh trên R2?')">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn btn-sm btn-ghost" type="submit">xoá</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card empty"><div class="big">◍</div>Chưa có batch nào.</div>
+  {% endif %}
+</div>
+</main>
+{% endblock %}

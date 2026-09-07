@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set show_nav = true %}
+{% set active = 'quota' %}
+{% block title %}Quota · Amazon Repurposer{% endblock %}
+
+{% block body %}
+<main>
+<div class="wrap stack" style="gap:18px">
+  <div>
+    <h1>Quota free tier</h1>
+    <p class="muted" style="margin-top:5px">Hết quota mà không biết là cách hỏng ngày làm việc nhanh nhất.</p>
+  </div>
+
+  <div class="stats">
+    {% for q in quotas %}
+    <div class="stat">
+      <div class="spread">
+        <span class="k">{{ q.service }}</span>
+        <span class="tiny dim">/ {{ q.window }}</span>
+      </div>
+      <div class="v">{{ q.used }} <span class="dim" style="font-size:14px">/ {{ q.limit }}</span></div>
+      <div class="meter {{ 'err' if q.pct >= 90 else ('warn' if q.pct >= 70 else '') }}">
+        <i style="width: {{ q.pct }}%"></i>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="stat">
+      <div class="spread"><span class="k">cloudflare r2</span><span class="tiny dim">/ tổng</span></div>
+      <div class="v">{{ r2_gb }} <span class="dim" style="font-size:14px">/ 10 GB</span></div>
+      <div class="meter {{ 'err' if r2_pct >= 90 else ('warn' if r2_pct >= 70 else '') }}">
+        <i style="width: {{ r2_pct }}%"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert">
+    <span>ℹ</span>
+    <div>
+      <strong>Scrape.do là nút thắt hẹp nhất.</strong>
+      Fetch trực tiếp chỉ pass ~20–25% nên đa số link sẽ tốn 1 credit.
+      Cache HTML 24 giờ là thứ bảo vệ hạn mức này — dán lại cùng link trong ngày không tốn thêm.
+    </div>
+  </div>
+</div>
+</main>
+{% endblock %}

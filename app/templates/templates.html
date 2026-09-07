@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% set show_nav = true %}
+{% set active = 'templates' %}
+{% block title %}Sticker · Amazon Repurposer{% endblock %}
+
+{% from "_macros.html" import slider %}
+{% block body %}
+<main>
+<div class="wrap stack" style="gap:20px">
+
+  <div>
+    <h1>Sticker &amp; Template</h1>
+    <p class="muted" style="margin-top:5px">
+      Chỉnh vị trí, kích thước rồi xem preview ngay — không phải chạy cả batch mới biết sai chỗ.
+    </p>
+  </div>
+
+  {% if error %}
+  <div class="alert err"><span>⚠</span><div>{{ error }}</div></div>
+  {% endif %}
+
+  <!-- kho sticker -->
+  <div class="card">
+    <div class="card-head"><h2>Kho sticker</h2>
+      <p class="small dim" style="margin:2px 0 0">Chỉ nhận PNG có nền trong suốt, tối đa 2 MB</p></div>
+
+    <div class="assetgrid">
+      {% for a in assets %}
+      <div class="assetcard">
+        <div class="assetimg"><img src="{{ a.cdn_url }}" alt="{{ a.name }}"></div>
+        <div class="grow" style="min-width:0">
+          <div class="small" style="font-weight:500">{{ a.name }}</div>
+          <div class="tiny dim">{{ a.width }}×{{ a.height }} · <code>{{ a.id }}</code></div>
+        </div>
+        <form method="post" action="/assets/{{ a.id }}/delete"
+              onsubmit="return confirm('Xoá sticker {{ a.name }}?')" style="margin:0">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn btn-sm btn-ghost" type="submit">xoá</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="dim small">Chưa có sticker nào.</div>
+      {% endfor %}
+    </div>
+
+    <hr class="divider">
+    <form method="post" action="/assets" enctype="multipart/form-data" class="row" style="gap:10px;flex-wrap:wrap">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input class="input" name="name" placeholder="Tên sticker" style="max-width:210px">
+      <input class="input" type="file" name="file" accept="image/png" required style="max-width:290px">
+      <button class="btn" type="submit">Tải lên</button>
+    </form>
+  </div>
+
+  <!-- editor -->
+  {% set t = templates[0] if templates else none %}
+  <form method="post" action="/templates/{{ t.id if t else 'default' }}" id="tplform">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="editor">
+
+      <div class="card">
+        <div class="card-head"><h2>Template</h2></div>
+        <label class="lbl">Tên</label>
+        <input class="input" name="name" value="{{ t.name if t else 'Template mặc định' }}"
+               style="margin-bottom:16px">
+
+        <div id="layers">
+        {% for L in (t.layers if t else []) %}
+          <div class="layer">
+            <div class="spread" style="margin-bottom:10px">
+              <span class="caps" style="margin:0">Lớp {{ loop.index }}</span>
+              <button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.layer').remove();px()">bỏ</button>
+            </div>
+
+            <label class="lbl">Sticker</label>
+            <select class="input" name="layer_asset" onchange="px()">
+              {% for a in assets %}
+              <option value="{{ a.id }}" {{ 'selected' if a.id == L.asset_id }}>{{ a.name }}</option>
+              {% endfor %}
+            </select>
+
+            <label class="lbl" style="margin-top:12px">Vị trí</label>
+            <div class="anchorgrid">
+              {% for an in anchors %}
+              <label class="anchorcell {{ 'on' if an == L.anchor }}" title="{{ an }}">
+                <input type="radio" name="layer_anchor" value="{{ an }}"
+                       {{ 'checked' if an == L.anchor }} onchange="pickAnchor(this);px()">
+                <span></span>
+              </label>
+              {% endfor %}
+            </div>
+
+            {{ slider('scale', 'Kích thước', (L.scale*100)|round|int, 2, 60, '%') }}
+            {{ slider('ox', 'Cách mép ngang', (L.offset_x*100)|round|int, 0, 30, '%') }}
+            {{ slider('oy', 'Cách mép dọc', (L.offset_y*100)|round|int, 0, 30, '%') }}
+            {{ slider('opacity', 'Độ đục', (L.opacity*100)|round|int, 10, 100, '%') }}
+            {{ slider('rotation', 'Xoay', L.rotation|round|int, -180, 180, '°') }}
+
+            <div class="row" style="gap:10px;margin-top:12px">
+              <div class="grow">
+                <label class="lbl">Dán vào</label>
+                <select class="input" name="layer_apply_to" onchange="px()">
+                  <option value="all" {{ 'selected' if L.apply_to=='all' }}>Tất cả ảnh</option>
+                  <option value="first_only" {{ 'selected' if L.apply_to=='first_only' }}>Chỉ ảnh đầu</option>
+                </select>
+              </div>
+              <div class="grow">
+                <label class="lbl">Điều kiện</label>
+                <select class="input" name="layer_when" onchange="px()">
+                  <option value="always" {{ 'selected' if L.when=='always' }}>Luôn dán</option>
+                  <option value="is_best_seller" {{ 'selected' if L.when=='is_best_seller' }}>Chỉ khi là Best Seller</option>
+                  <option value="has_free_delivery" {{ 'selected' if L.when=='has_free_delivery' }}>Chỉ khi free delivery</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+
+        <div class="row" style="gap:8px;margin-top:14px">
+          <button type="button" class="btn btn-sm" onclick="addLayer()">+ Thêm lớp</button>
+          <button class="btn btn-primary btn-sm" type="submit" style="margin-left:auto">Lưu template</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Preview</h2>
+          <p class="small dim" style="margin:2px 0 0">Cập nhật khi bạn chỉnh</p></div>
+        <div class="previewbox"><img id="pv" alt="preview"></div>
+        <div class="alert warn" style="margin-top:14px">
+          <span>⚠</span>
+          <div>Điều kiện <strong>Luôn dán</strong> với badge khẳng định (Best Seller) là
+          quảng cáo sai sự thật nếu sản phẩm không phải best seller. Cân nhắc dùng
+          <strong>Chỉ khi là Best Seller</strong>.</div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+</div>
+</main>
+
+<script>
+const ANCHORS = {{ anchors|tojson }};
+const ASSETS = {{ assets|map(attribute='id')|list|tojson }};
+const ASSET_NAMES = {{ assets|map(attribute='name')|list|tojson }};
+
+function pickAnchor(input){
+  input.closest('.anchorgrid').querySelectorAll('.anchorcell').forEach(c=>c.classList.remove('on'));
+  input.closest('.anchorcell').classList.add('on');
+}
+
+function addLayer(){
+  if(!ASSETS.length){ alert('Tải sticker lên trước đã.'); return; }
+  const opts = ASSETS.map((id,i)=>`<option value="${id}">${ASSET_NAMES[i]}</option>`).join('');
+  const cells = ANCHORS.map(a=>`<label class="anchorcell ${a==='top-right'?'on':''}" title="${a}">
+      <input type="radio" name="layer_anchor" value="${a}" ${a==='top-right'?'checked':''}
+             onchange="pickAnchor(this);px()"><span></span></label>`).join('');
+  const sl = (n,l,v,mn,mx,u)=>`<div class="sl"><div class="spread"><label class="lbl" style="margin:0">${l}</label>
+      <span class="tiny mono num sv">${v}${u}</span></div>
+      <input type="range" name="layer_${n}" min="${mn}" max="${mx}" value="${v}"
+        oninput="this.closest('.sl').querySelector('.sv').textContent=this.value+'${u}';px()"></div>`;
+  const d = document.createElement('div');
+  d.className = 'layer';
+  d.innerHTML = `<div class="spread" style="margin-bottom:10px">
+      <span class="caps" style="margin:0">Lớp mới</span>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.layer').remove();px()">bỏ</button></div>
+    <label class="lbl">Sticker</label>
+    <select class="input" name="layer_asset" onchange="px()">${opts}</select>
+    <label class="lbl" style="margin-top:12px">Vị trí</label>
+    <div class="anchorgrid">${cells}</div>
+    ${sl('scale','Kích thước',16,2,60,'%')}${sl('ox','Cách mép ngang',3,0,30,'%')}
+    ${sl('oy','Cách mép dọc',3,0,30,'%')}${sl('opacity','Độ đục',100,10,100,'%')}
+    ${sl('rotation','Xoay',0,-180,180,'°')}
+    <div class="row" style="gap:10px;margin-top:12px">
+      <div class="grow"><label class="lbl">Dán vào</label>
+        <select class="input" name="layer_apply_to" onchange="px()">
+          <option value="all">Tất cả ảnh</option><option value="first_only">Chỉ ảnh đầu</option></select></div>
+      <div class="grow"><label class="lbl">Điều kiện</label>
+        <select class="input" name="layer_when" onchange="px()">
+          <option value="always">Luôn dán</option>
+          <option value="is_best_seller">Chỉ khi là Best Seller</option>
+          <option value="has_free_delivery">Chỉ khi free delivery</option></select></div>
+    </div>`;
+  document.getElementById('layers').appendChild(d);
+  px();
+}
+
+let pvTimer, pvUrl;
+function px(){
+  clearTimeout(pvTimer);
+  pvTimer = setTimeout(async ()=>{
+    const fd = new FormData(document.getElementById('tplform'));
+    const r = await fetch('/templates/preview/render', {method:'POST', body:fd});
+    if(!r.ok) return;
+    const b = await r.blob();
+    if(pvUrl) URL.revokeObjectURL(pvUrl);   // không revoke -> rò memory sau vài chục lần kéo
+    pvUrl = URL.createObjectURL(b);
+    document.getElementById('pv').src = pvUrl;
+  }, 400);
+}
+window.addEventListener('DOMContentLoaded', px);
+</script>
+{% endblock %}

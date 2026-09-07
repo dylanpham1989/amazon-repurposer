@@ -1,0 +1,11 @@
+fastapi>=0.115
+uvicorn[standard]>=0.32
+jinja2>=3.1
+python-multipart>=0.0.12
+pydantic-settings>=2.6
+asyncpg>=0.30
+httpx[http2]>=0.28
+selectolax>=0.3.21
+pillow>=11.0
+boto3>=1.35
+itsdangerous>=2.2

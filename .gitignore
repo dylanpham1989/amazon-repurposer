@@ -1,0 +1,26 @@
+# Secrets — TUYỆT ĐỐI không commit
+.env
+.env.local
+.env.*.local
+
+# Database SQLite (WAL sinh 3 file)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Ảnh/HTML tạm khi debug
+tmp/
+out/

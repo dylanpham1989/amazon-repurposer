@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set show_nav = false %}
+{% block title %}Đăng nhập · Amazon Repurposer{% endblock %}
+
+{% block body %}
+<div class="center-screen">
+  <div class="login-card">
+
+    <div class="login-mark">
+      <span class="logo">A</span>
+      <div>
+        <h1>Amazon Repurposer</h1>
+        <p class="small dim" style="margin:2px 0 0">Lấy ảnh &amp; nội dung, dán sticker, viết lại bằng AI</p>
+      </div>
+    </div>
+
+    <div class="card">
+      {% if error %}
+      <div class="alert err" style="margin-bottom:14px">
+        <span>⚠</span><div>{{ error }}</div>
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login" class="stack" style="gap:14px">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <div>
+          <label class="lbl" for="pw">Mật khẩu</label>
+          <input class="input" type="password" id="pw" name="password"
+                 autocomplete="current-password" autofocus required
+                 placeholder="Nhập mật khẩu">
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%">Đăng nhập</button>
+      </form>
+    </div>
+
+    <p class="tiny dim" style="text-align:center;margin-top:16px">
+      Mật khẩu đặt ở <code>APP_PASSWORD</code> trong <code>.env</code>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

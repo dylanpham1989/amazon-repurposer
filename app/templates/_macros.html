@@ -1,0 +1,23 @@
+{# Nút copy dùng cho MỌI ô hiển thị #}
+{% macro copybtn(text, label="") %}
+<button type="button" class="copy-btn" data-copy="{{ text }}" title="Copy {{ label }}">copy</button>
+{% endmacro %}
+
+{% macro field(label, text, tone="") %}
+<div class="fld {{ tone }}">
+  <div class="fld-k">{{ label }}</div>
+  <div class="fld-v">{{ text if text else '—' }}</div>
+  {% if text %}{{ copybtn(text, label) }}{% endif %}
+</div>
+{% endmacro %}
+
+{% macro slider(name, label, value, mn, mx, unit) %}
+<div class="sl">
+  <div class="spread">
+    <label class="lbl" style="margin:0">{{ label }}</label>
+    <span class="tiny mono num sv">{{ value }}{{ unit }}</span>
+  </div>
+  <input type="range" name="layer_{{ name }}" min="{{ mn }}" max="{{ mx }}" value="{{ value }}"
+         oninput="this.closest('.sl').querySelector('.sv').textContent=this.value+'{{ unit }}';px()">
+</div>
+{% endmacro %}

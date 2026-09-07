@@ -1,0 +1,113 @@
+{% from "_macros.html" import copybtn, field %}
+<article class="card prod">
+
+  <div class="prod-head">
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <code class="asin">{{ p.asin or '?' }}</code>
+      {% if p.status == 'done' %}<span class="badge ok"><span class="dot"></span>xong</span>
+      {% elif p.status == 'running' %}<span class="badge"><span class="spin"></span>{{ p.stage or 'đang chạy' }}</span>
+      {% elif p.status == 'failed' %}<span class="badge err"><span class="dot"></span>lỗi</span>
+      {% else %}<span class="badge">chờ</span>{% endif %}
+
+      {% if p.rewrite_status == 'failed' %}
+        <span class="badge err" title="{{ p.flags|join('; ') }}">⚠ viết lại thất bại — đang hiện bản gốc</span>
+      {% elif p.rewrite_status == 'skipped' %}
+        <span class="badge warn" title="{{ p.flags|join('; ') }}">viết lại bị bỏ qua</span>
+      {% endif %}
+
+      {% if p.desc_source %}<span class="badge tiny">mô tả: {{ p.desc_source }}</span>{% endif %}
+      {% if p.fetched_via %}<span class="badge tiny">lấy qua: {{ p.fetched_via }}</span>{% endif %}
+      {% if p.is_best_seller %}<span class="badge warn">Best Seller</span>{% endif %}
+    </div>
+    {% if p.status in ('done','failed') %}
+    <div class="row" style="gap:6px">
+      {% if p.orig_title %}
+      <button type="button" class="btn btn-sm btn-ghost"
+              onclick="document.getElementById('ed-{{ p.id }}').classList.toggle('on')">Sửa tay</button>
+      {% endif %}
+      <form method="post" action="/products/{{ p.id }}/rewrite" style="margin:0">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn-sm btn-ghost" type="submit">Viết lại</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if p.error %}
+    <div class="alert err" style="margin-top:12px"><span>⚠</span><div>{{ p.error }}</div></div>
+  {% endif %}
+
+  {% if p.orig_title %}
+  <div class="sect">
+    <div class="caps">Tiêu đề</div>
+    {{ field("cũ", p.orig_title) }}
+    {{ field("mới", p.new_title, "new") }}
+  </div>
+
+  <div class="sect">
+    <div class="caps">Mô tả</div>
+    {{ field("cũ", p.orig_desc) }}
+    {{ field("mới", p.new_desc, "new") }}
+  </div>
+  {% endif %}
+
+  {% if p.orig_title %}
+  <form method="post" action="/products/{{ p.id }}/edit" class="editrow" id="ed-{{ p.id }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="sect" style="margin-top:0">
+      <div class="caps">Sửa tay</div>
+      <label class="lbl">Tiêu đề mới</label>
+      <input class="input" name="new_title" value="{{ p.new_title or p.orig_title }}">
+      <label class="lbl" style="margin-top:10px">Mô tả mới</label>
+      <textarea class="textarea" name="new_desc" rows="4">{{ p.new_desc or p.orig_desc }}</textarea>
+      <div class="row" style="gap:8px;margin-top:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-sm btn-ghost"
+                onclick="document.getElementById('ed-{{ p.id }}').classList.remove('on')">Huỷ</button>
+        <button class="btn btn-sm btn-primary" type="submit">Lưu</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  {% if p.images %}
+  <div class="sect">
+    <div class="spread" style="margin-bottom:9px">
+      <span class="caps" style="margin:0">Ảnh · {{ p.images|length }}</span>
+      {% if p.cdn_urls %}
+        {{ copybtn(p.cdn_urls|join('\n'), "tất cả link ảnh mới") }}
+      {% endif %}
+    </div>
+
+    <div class="imgtable">
+      <div class="imgrow imghead">
+        <div class="c-n">#</div><div class="c-o">Ảnh gốc</div><div class="c-w">Ảnh mới + link</div>
+      </div>
+      {% for im in p.images %}
+      <div class="imgrow">
+        <div class="c-n num">{{ im.position + 1 }}</div>
+        <div class="c-o">
+          <a href="{{ im.source_url }}" target="_blank" rel="noopener">
+            <img src="{{ im.source_url }}" alt="" loading="lazy">
+          </a>
+        </div>
+        <div class="c-w">
+          {% if im.cdn_url %}
+            <a href="{{ im.cdn_url }}" target="_blank" rel="noopener">
+              <img src="{{ im.cdn_url }}" alt="" loading="lazy">
+            </a>
+            <div class="urlbox">
+              <span class="mono url">{{ im.cdn_url }}</span>
+              {{ copybtn(im.cdn_url, "link ảnh " ~ (im.position + 1)) }}
+            </div>
+            <div class="tiny dim">{{ im.width }}×{{ im.height }} · {{ (im.bytes / 1024)|round|int }} KB</div>
+          {% else %}
+            <div class="imgerr">lỗi: {{ im.error or 'không xử lý được' }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</article>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>{% block title %}Amazon Repurposer{% endblock %}</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c6cff'/><text x='16' y='23' font-size='19' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'>A</text></svg>">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.4/htmx.min.js"
+        integrity="sha512-2rNj2KJ+D8s1ceNasTIex6z4HWyOnEYLVC3FigGOmyQCZc2eBXKgOxQmo3oKLHyfcj53uz4QMsRCWNbLd32Q1g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+<script src="/static/app.js?v={{ asset_v }}" defer></script>
+</head>
+<body>
+
+{% if show_nav %}
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/"><span class="logo">A</span> Amazon Repurposer</a>
+    <nav class="nav">
+      <a href="/" class="{{ 'on' if active == 'home' }}">Trang chính</a>
+      <a href="/batches" class="{{ 'on' if active == 'batches' }}">Lịch sử</a>
+      <a href="/templates" class="{{ 'on' if active == 'templates' }}">Sticker</a>
+      <a href="/quota" class="{{ 'on' if active == 'quota' }}">Quota</a>
+      <a href="/logout">Thoát</a>
+    </nav>
+  </div>
+</header>
+{% endif %}
+
+{% block body %}{% endblock %}
+
+</body>
+</html>

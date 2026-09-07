@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% set show_nav = true %}
+{% set active = 'home' %}
+{% block title %}Trang chính · Amazon Repurposer{% endblock %}
+
+{% block body %}
+<main>
+<div class="wrap stack" style="gap:20px">
+
+  <div>
+    <h1>Lấy nội dung sản phẩm Amazon</h1>
+    <p class="muted" style="margin-top:5px">
+      Dán link, hệ thống lấy toàn bộ ảnh ở độ phân giải cao nhất, dán sticker,
+      và viết lại tiêu đề / mô tả giữ nguyên nội dung.
+    </p>
+  </div>
+
+  <div class="card">
+    <form method="post" action="/submit" class="stack" style="gap:14px">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div>
+        <div class="spread" style="margin-bottom:7px">
+          <label class="lbl" for="urls" style="margin:0">Link Amazon</label>
+          <span class="tiny dim">mỗi dòng 1 link · tối đa {{ max_links }}</span>
+        </div>
+        <textarea class="textarea" id="urls" name="urls" rows="4"
+          placeholder="https://www.amazon.com/dp/B0863TXGM3">{{ urls or '' }}</textarea>
+      </div>
+
+      {% if errors %}
+      <div class="alert err">
+        <span>⚠</span>
+        <div>
+          <strong>Link không hợp lệ — chưa tạo batch nào.</strong>
+          <ul style="margin:6px 0 0;padding-left:17px">
+            {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="spread">
+        <span class="tiny dim">⌘/Ctrl + Enter để gửi nhanh</span>
+        <button class="btn btn-primary" type="submit">Xử lý</button>
+      </div>
+    </form>
+  </div>
+
+  {% if view %}
+    {% include "_results.html" %}
+  {% else %}
+    <div class="card empty">
+      <div class="big">◍</div>
+      Chưa có gì. Dán link Amazon phía trên và bấm Xử lý.
+    </div>
+  {% endif %}
+
+</div>
+</main>
+{% endblock %}

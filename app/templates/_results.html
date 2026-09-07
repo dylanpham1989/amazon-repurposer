@@ -1,0 +1,28 @@
+<div id="results"
+     {% if view and view.active %}hx-get="/results/{{ view.batch.id }}" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+{% if view %}
+  {% set b = view.batch %}
+  <div class="card" style="margin-bottom:18px">
+    <div class="spread">
+      <div class="row" style="gap:9px">
+        {% if view.active %}<span class="spin"></span>{% endif %}
+        <strong>{{ b.done + b.failed }}/{{ b.total }} sản phẩm</strong>
+        {% if b.failed %}<span class="badge err">{{ b.failed }} lỗi</span>{% endif %}
+        <span class="badge {{ 'ok' if b.status in ('done',) else ('err' if b.status=='failed' else '') }}">{{ b.status }}</span>
+      </div>
+      <div class="row" style="gap:6px">
+        <a class="btn btn-sm" href="/batches/{{ b.id }}/export?fmt=json">JSON</a>
+        <a class="btn btn-sm" href="/batches/{{ b.id }}/export?fmt=csv">CSV</a>
+        <a class="btn btn-sm" href="/batches/{{ b.id }}/zip">ZIP ảnh</a>
+      </div>
+    </div>
+    <div class="meter" style="margin-top:11px">
+      <i style="width: {{ ((b.done + b.failed) / (b.total or 1) * 100)|round|int }}%"></i>
+    </div>
+  </div>
+
+  <div class="stack" style="gap:16px">
+    {% for p in view.products %}{% include "_product.html" %}{% endfor %}
+  </div>
+{% endif %}
+</div>

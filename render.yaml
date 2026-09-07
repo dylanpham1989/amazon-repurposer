@@ -1,0 +1,49 @@
+# Render Blueprint. Deploy: New > Blueprint > trỏ vào repo này.
+services:
+  - type: web
+    name: amazon-repurposer
+    runtime: docker
+    plan: free                  # 512MB / 0.1 CPU, spin-down sau 15 phút không dùng
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      # --- điền trên dashboard Render, KHÔNG commit ---
+      - key: APP_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true     # Render tự sinh chuỗi ngẫu nhiên
+      - key: DATABASE_URL
+        sync: false             # connection string Neon
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SCRAPEDO_TOKEN
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
+
+      # --- tinh chỉnh cho 0.1 CPU / 512MB: KHÔNG để mặc định của máy local ---
+      - key: IMAGE_MAX_EDGE
+        value: "1600"           # 2000px trên 0.1 CPU quá chậm
+      - key: IMAGE_CONCURRENCY
+        value: "2"              # 4 luồng Pillow sẽ đụng trần RAM
+      - key: WEBP_METHOD
+        value: "2"              # 4 nén tốt hơn nhưng chậm gấp ~3
+      - key: DB_POOL_SIZE
+        value: "3"              # Neon free giới hạn kết nối
+      - key: MAX_LINKS_PER_BATCH
+        value: "10"
+      - key: GEMINI_MODEL
+        value: gemini-3.7-flash
+      - key: GEMINI_MODEL_FALLBACK
+        value: gemini-flash-lite-latest
+      - key: REQUEST_DELAY_SECONDS
+        value: "2.0"

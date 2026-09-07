@@ -1,0 +1,13 @@
+<div id="status" class="stats">
+  {% for c in checks %}
+  <div class="stat">
+    <div class="spread">
+      <span class="k">{{ c.name }}</span>
+      <span class="badge {{ 'ok' if c.ok else 'err' }}">
+        <span class="dot"></span>{{ 'OK' if c.ok else 'lỗi' }}
+      </span>
+    </div>
+    <div class="v" style="font-size:14px;font-weight:500;color:var(--text-2)">{{ c.detail }}</div>
+  </div>
+  {% endfor %}
+</div>
