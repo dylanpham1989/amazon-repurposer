@@ -56,6 +56,13 @@ uv run pytest -q
 uv run ruff check app/
 ```
 
+Test parser cần fixture HTML thật, **không nằm trong repo** (2.4 MB và là nội dung
+có bản quyền của Amazon). Không có nó thì các test đó tự skip. Tạo lại:
+
+```bash
+uv run scripts/check_setup.py     # lưu data/fixtures/amazon_scrapedo.html
+```
+
 ## Backup
 
 Dữ liệu nằm trong Postgres:

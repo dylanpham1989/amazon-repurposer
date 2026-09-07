@@ -3,10 +3,11 @@
 .env.local
 .env.*.local
 
-# Database SQLite (WAL sinh 3 file)
-data/*.db
-data/*.db-wal
-data/*.db-shm
+# Toàn bộ data/ — chứa:
+#   - app.db (SQLite cũ)
+#   - fixtures/*.html: trang Amazon đã lưu, 2.4MB, NỘI DUNG CÓ BẢN QUYỀN → không đẩy lên GitHub
+#   - assets/*.png: sticker cache (giờ lưu trong Postgres)
+data/
 
 # Python
 __pycache__/
